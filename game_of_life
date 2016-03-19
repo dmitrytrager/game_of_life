@@ -1,7 +1,28 @@
-!/usr/bin/env ruby
+#!/usr/bin/env ruby
 $LOAD_PATH << File.join(File.dirname(__FILE__))
 
-require 'fileutils'
+TEST_ITERATES_NUMBER = 1
+
+require 'app/game'
+
+def input_file_name
+  ARGV[0]
+end
+
+def output_file_name
+  input_file_name.split('.').first + '_output.txt'
+end
 
 begin
+  File.open output_file_name, 'w' do |file|
+    file.write(
+      Game
+        .start_with_data(File.new(input_file_name, 'r').read)
+        .iterate(TEST_ITERATES_NUMBER)
+        .result
+    )
+  end
+rescue Exception => e
+  puts "Exception: #{e}"
+  exit(1)
 end
