@@ -1,11 +1,9 @@
-require 'app/cell'
+require './app/cell'
 
 class Grid
   CELL_DELIMETER = " "
   LINES_DELIMETER = "\n"
   HEADER_FOOTER_LINE = "```"
-
-  attr_accessor :cells
 
   def self.from_data(data)
     new create_cells_from_data(data)
@@ -22,9 +20,9 @@ class Grid
   def to_s
     [
       HEADER_FOOTER_LINE,
-      cells.map { |line| line.map(&:to_i).join(CELL_DELIMETER) },
+      @cells.map { |line| line.map(&:to_i).join(CELL_DELIMETER) },
       HEADER_FOOTER_LINE
-    ].join(LINES_DELIMETER)
+    ].join(LINES_DELIMETER) << LINES_DELIMETER
   end
 
   private
@@ -59,7 +57,7 @@ class Grid
   def cells_map
     # just a variable caching, not mutating
     @cells_map ||= Hash[
-      cells.each_with_index.map do |line, y|
+      @cells.each_with_index.map do |line, y|
         line.each_with_index.map do |cell, x|
           [ [x, y], cell.live? ]
         end
@@ -70,7 +68,7 @@ class Grid
   def neighbors_map
     # just a variable caching, not mutating
     @neighbors_map ||= Hash[
-      cells.each_with_index.map do |line, y|
+      @cells.each_with_index.map do |line, y|
         line.each_with_index.map do |_, x|
           [ [x, y], neightborhood_cells(x, y).count { |neighbor| neighbor.live? } ]
         end
@@ -79,13 +77,13 @@ class Grid
   end
 
   def width
-    cells[0].size
+    @cells[0].size
   rescue
     0
   end
 
   def height
-    cells.size
+    @cells.size
   end
 
   def neightborhood_cells(x, y)
@@ -104,10 +102,12 @@ class Grid
       [[x-1, 0].max,       [y+1, height-1].min],
       [x,                  [y+1, height-1].min],
       [[x+1, width-1].min, [y+1, height-1].min]
-    ].uniq
+    ]
+      .uniq
+      .reject { |_x, _y| _x == x && _y ==y }
   end
 
   def fetch_cell(coordinate)
-    cells[coordinate[1]][coordinate[0]]
+    @cells[coordinate[1]][coordinate[0]]
   end
 end
